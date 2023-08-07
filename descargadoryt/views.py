@@ -1,5 +1,5 @@
-from django.shortcuts import render,HttpResponseRedirect
-import requests
+from django.shortcuts import render
+from django.http import StreamingHttpResponse
 from pytube import YouTube
 from pytube.exceptions import PytubeError
 
@@ -13,14 +13,14 @@ def home(request):
         calidad_audio = request.POST.get('calidad_audio', 'highest')
 
         try:
-            # Redirigir al usuario a la URL del archivo descargado
-            return descargar_video_audio(request, link, formato, calidad_video, calidad_audio)
+            # Redirigir al usuario a la URL de descarga
+            response = descargar_video_audio(request, link, formato, calidad_video, calidad_audio)
+            return response
 
         except PytubeError as e:
             mensaje = f"Error en la descarga: {e}"
 
     return render(request, 'home.html', {'mensaje': mensaje})
-
 
 
 def descargar_video_audio(request, url, formato='mp4', calidad_video='highest', calidad_audio='highest'):
@@ -37,16 +37,19 @@ def descargar_video_audio(request, url, formato='mp4', calidad_video='highest', 
             raise ValueError("Formato no válido. Debe ser 'mp4' o 'mp3'.")
 
         if stream:
-            response = requests.get(stream.url)
-            archivo = response.content
-            extension = formato
+            # Definir una función generadora para transmitir el contenido del archivo
+            def file_iterator():
+                for chunk in stream.stream():
+                    yield chunk
 
-            # Devuelve una redirección al archivo descargado
-            return HttpResponseRedirect(stream.url)
+            # Devolver la respuesta de transmisión con el contenido del archivo
+            response = StreamingHttpResponse(file_iterator(), content_type='application/octet-stream')
+            file_name = f"{stream.title}.{stream.subtype}"
+            response['Content-Disposition'] = f'attachment; filename="{file_name}"'
+            return response
 
         else:
             raise PytubeError("No se encontró la calidad especificada.")
 
     except Exception as e:
         raise PytubeError(f"Ocurrió un error: {e}")
-
