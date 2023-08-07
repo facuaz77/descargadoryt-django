@@ -2,7 +2,7 @@ from django.shortcuts import render,HttpResponse
 import requests
 from pytube import YouTube
 from pytube.exceptions import PytubeError
-
+import logging
 
 
 def home(request):
@@ -49,5 +49,6 @@ def descargar_video_audio(url, formato='mp4', calidad_video='highest', calidad_a
         else:
             raise PytubeError("No se encontró la calidad especificada.")
     except Exception as e:
-        raise PytubeError(f"Ocurrió un error: {e}")
+        logging.error(f"Error during video download: {e}")
+        raise PytubeError(f"Ocurrió un error durante la descarga del video: {e}")
 
