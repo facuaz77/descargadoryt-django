@@ -1,7 +1,18 @@
 import os
-from django.http import FileResponse, render 
+from django.http import FileResponse, render, StreamingHttpResponse
 from pytube import YouTube
 from pytube.exceptions import PytubeError
+
+
+def file_iterator(file_path, chunk_size=8192):
+    with open(file_path, 'rb') as f:
+        while True:
+            data = f.read(chunk_size)
+            if not data:
+                break
+            yield data
+
+
 
 def home(request):
     mensaje = ""
@@ -42,12 +53,12 @@ def descargar_video_audio(request, url, formato='mp4', calidad_video='highest', 
             temp_dir = '/tmp'
             file_name = f"{stream.title}.{stream.subtype}"
             file_path = os.path.join(temp_dir, file_name)
-            
+
             # Descargar el archivo en el directorio temporal
             stream.download(output_path=temp_dir, filename=file_name)
 
             # Devolver la respuesta con el archivo descargado
-            response = FileResponse(open(file_path, 'rb'), content_type='application/octet-stream')
+            response = StreamingHttpResponse(file_iterator(file_path), content_type='application/octet-stream')
             response['Content-Disposition'] = f'attachment; filename="{file_name}"'
             return response
 
