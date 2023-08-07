@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import StreamingHttpResponse
+from django.http import HttpResponse
 from pytube import YouTube
 from pytube.exceptions import PytubeError
 
@@ -37,13 +37,11 @@ def descargar_video_audio(request, url, formato='mp4', calidad_video='highest', 
             raise ValueError("Formato no válido. Debe ser 'mp4' o 'mp3'.")
 
         if stream:
-            # Definir una función generadora para transmitir el contenido del archivo
-            def file_iterator():
-                for chunk in stream.stream():
-                    yield chunk
+            # Obtiene el contenido del archivo
+            file_content = stream.stream_to_buffer()
 
-            # Devolver la respuesta de transmisión con el contenido del archivo
-            response = StreamingHttpResponse(file_iterator(), content_type='application/octet-stream')
+            # Devuelve el archivo en una HttpResponse
+            response = HttpResponse(file_content, content_type='application/octet-stream')
             file_name = f"{stream.title}.{stream.subtype}"
             response['Content-Disposition'] = f'attachment; filename="{file_name}"'
             return response
