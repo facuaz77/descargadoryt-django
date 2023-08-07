@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouTube Downloader</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link rel="icon" href="{% static 'descargador.png' %}" type="image/x-icon">
+</head>
+<body>
+    
+    <div class="container">
+        <div class="form-container">
+            <h1>YouTube Downloader</h1>
+            <form method="post">
+                {% csrf_token %}
+                <label for="link">URL del video de YouTube:</label>
+                <input type="text" id="link" name="link" required>
+                
+                <label for="formato">Formato:</label>
+                <select id="formato" name="formato">
+                    <option value="choice">Selecciona formato</option>
+                    <option value="mp4">MP4 (Video)</option>
+                    <option value="mp3">MP3 (Audio)</option>
+                </select>
+                
+                <div class="video-quality" style="display: none;">
+                    <label for="calidad_video">Calidad del video:</label>
+                    <select id="calidad_video" name="calidad_video">
+                        <option value="highest">Máxima calidad</option>
+                        <option value="720p">720p</option>
+                        <option value="360p">360p</option>
+                    </select>
+                </div>
+                
+                <div class="audio-quality" style="display: none;">
+                    <label for="calidad_audio">Calidad del audio:</label>
+                    <select id="calidad_audio" name="calidad_audio">
+                        <option value="highest">Calidad máxima</option>
+                        <option value="160kbps">160 kbps</option>
+                        <option value="128kbps">128 kbps</option>
+                    </select>
+                </div>
+                
+                <input type="submit" value="Descargar">
+            </form>
+            <p class="message">{{ mensaje }}</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('formato').addEventListener('change', function() {
+            var videoQuality = document.querySelector('.video-quality');
+            var audioQuality = document.querySelector('.audio-quality');
+
+            if (this.value === 'mp4') {
+                videoQuality.style.display = 'block';
+                audioQuality.style.display = 'none';
+            } else if (this.value === 'mp3') {
+                videoQuality.style.display = 'none';
+                audioQuality.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
