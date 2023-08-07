@@ -1,4 +1,4 @@
-from django.shortcuts import render,HttpResponse
+from django.shortcuts import render,HttpResponseRedirect
 import requests
 from pytube import YouTube
 from pytube.exceptions import PytubeError
@@ -9,24 +9,21 @@ def home(request):
     if request.method == 'POST':
         link = request.POST.get('link', '')
         formato = request.POST.get('formato', 'mp4')
-        calidad_video = request.POST.get('calidad_video', 'highest') 
+        calidad_video = request.POST.get('calidad_video', 'highest')
         calidad_audio = request.POST.get('calidad_audio', 'highest')
 
         try:
-            # Descargar el contenido del video/audio
-            archivo, extension = descargar_video_audio(link, formato, calidad_video, calidad_audio)
+            # Redirigir al usuario a la URL del archivo descargado
+            return descargar_video_audio(request, link, formato, calidad_video, calidad_audio)
 
-            # Crear una respuesta HTTP para la descarga
-            response = HttpResponse(archivo, content_type=f"video/{extension}")
-            response['Content-Disposition'] = f'attachment; filename="video.{extension}"'
-            mensaje = f"Descarga completada!"
-            return response
         except PytubeError as e:
             mensaje = f"Error en la descarga: {e}"
 
     return render(request, 'home.html', {'mensaje': mensaje})
 
-def descargar_video_audio(url, formato='mp4', calidad_video='highest', calidad_audio='highest' ):
+
+
+def descargar_video_audio(request, url, formato='mp4', calidad_video='highest', calidad_audio='highest'):
     try:
         # Crea una instancia de la clase YouTube
         yt = YouTube(url)
@@ -40,14 +37,16 @@ def descargar_video_audio(url, formato='mp4', calidad_video='highest', calidad_a
             raise ValueError("Formato no válido. Debe ser 'mp4' o 'mp3'.")
 
         if stream:
-          
             response = requests.get(stream.url)
             archivo = response.content
             extension = formato
 
-            return archivo, extension
+            # Devuelve una redirección al archivo descargado
+            return HttpResponseRedirect(stream.url)
+
         else:
             raise PytubeError("No se encontró la calidad especificada.")
+
     except Exception as e:
         raise PytubeError(f"Ocurrió un error: {e}")
 
