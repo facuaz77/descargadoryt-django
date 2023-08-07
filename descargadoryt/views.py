@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import FileResponse
 from pytube import YouTube
 from pytube.exceptions import PytubeError
 
@@ -37,12 +37,16 @@ def descargar_video_audio(request, url, formato='mp4', calidad_video='highest', 
             raise ValueError("Formato no válido. Debe ser 'mp4' o 'mp3'.")
 
         if stream:
-            # Obtiene el contenido del archivo
-            file_content = stream.stream_to_buffer()
-
-            # Devuelve el archivo en una HttpResponse
-            response = HttpResponse(file_content, content_type='application/octet-stream')
+            # Descargar el archivo en un directorio temporal
+            temp_dir = "/path/to/temp/directory"  # Replace with your desired temporary directory path
             file_name = f"{stream.title}.{stream.subtype}"
+            file_path = os.path.join(temp_dir, file_name)
+            
+            # Descargar el archivo en el directorio temporal
+            stream.download(output_path=temp_dir, filename=file_name)
+
+            # Devolver la respuesta con el archivo descargado
+            response = FileResponse(open(file_path, 'rb'), content_type='application/octet-stream')
             response['Content-Disposition'] = f'attachment; filename="{file_name}"'
             return response
 
