@@ -1,8 +1,7 @@
-from django.shortcuts import render
+import boto3
 from django.http import FileResponse
 from pytube import YouTube
 from pytube.exceptions import PytubeError
-import os
 
 def home(request):
     mensaje = ""
@@ -23,6 +22,8 @@ def home(request):
     return render(request, 'home.html', {'mensaje': mensaje})
 
 
+
+
 def descargar_video_audio(request, url, formato='mp4', calidad_video='highest', calidad_audio='highest'):
     try:
         # Crea una instancia de la clase YouTube
@@ -37,16 +38,21 @@ def descargar_video_audio(request, url, formato='mp4', calidad_video='highest', 
             raise ValueError("Formato no válido. Debe ser 'mp4' o 'mp3'.")
 
         if stream:
-            # Descargar el archivo en un directorio temporal
-            temp_dir = "/path/to/temp/directory"  # Replace with your desired temporary directory path
+            # Descargar el archivo en un objeto de almacenamiento en la nube (Amazon S3)
+            s3_bucket = 'your-s3-bucket-name'
+            s3_client = boto3.client('s3')
             file_name = f"{stream.title}.{stream.subtype}"
-            file_path = os.path.join(temp_dir, file_name)
+            s3_key = f"path/in/s3/bucket/{file_name}"
             
-            # Descargar el archivo en el directorio temporal
-            stream.download(output_path=temp_dir, filename=file_name)
+            # Descargar el archivo en el objeto de almacenamiento en la nube (Amazon S3)
+            stream.download(output_path='/tmp', filename=file_name)
+            s3_client.upload_file(f'/tmp/{file_name}', s3_bucket, s3_key)
 
-            # Devolver la respuesta con el archivo descargado
-            response = FileResponse(open(file_path, 'rb'), content_type='application/octet-stream')
+            # Generar un pre-signed URL para el objeto en el bucket de S3
+            s3_url = s3_client.generate_presigned_url('get_object', Params={'Bucket': s3_bucket, 'Key': s3_key}, ExpiresIn=3600)
+
+            # Devolver la respuesta con el enlace al archivo descargado
+            response = FileResponse(s3_url)
             response['Content-Disposition'] = f'attachment; filename="{file_name}"'
             return response
 
