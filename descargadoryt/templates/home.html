@@ -13,7 +13,7 @@
             <h1>YouTube Downloader</h1>
             <a href="https://github.com/facuaz77" style="text-decoration: none;"><p style="text-align: center; color: rgb(245, 149, 165)">By Facundo Alaniz</p></a>
             
-            <form method="post">
+            <form method="post" action="{% url 'home' %}" enctype="multipart/form-data">
                 {% csrf_token %}
                 <label for="link">URL del video de YouTube:</label>
                 <input type="text" id="link" name="link" required>
@@ -29,6 +29,7 @@
                     <label for="calidad_video">Calidad del video:</label>
                     <select id="calidad_video" name="calidad_video">
                         <option value="highest">Máxima calidad</option>
+                        <option value="1080p">1080p</option>
                         <option value="720p">720p</option>
                         <option value="360p">360p</option>
                     </select>
