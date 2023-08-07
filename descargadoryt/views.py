@@ -4,12 +4,13 @@ from pytube import YouTube
 from pytube.exceptions import PytubeError
 
 
+
 def home(request):
     mensaje = ""
     if request.method == 'POST':
         link = request.POST.get('link', '')
         formato = request.POST.get('formato', 'mp4')
-        calidad_video = request.POST.get('calidad_video', 'highest') 
+        calidad_video = request.POST.get('calidad_video', 'highest')
         calidad_audio = request.POST.get('calidad_audio', 'highest')
 
         try:
@@ -40,7 +41,6 @@ def descargar_video_audio(url, formato='mp4', calidad_video='highest', calidad_a
             raise ValueError("Formato no válido. Debe ser 'mp4' o 'mp3'.")
 
         if stream:
-          
             response = requests.get(stream.url)
             archivo = response.content
             extension = formato
