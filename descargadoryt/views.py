@@ -26,6 +26,8 @@ def home(request):
         except PytubeError as e:
             mensaje = f"Error en la descarga: {e}"
 
+
+
     return render(request, 'home.html', {'mensaje': mensaje})
 
 def descargar_video_audio(url, formato='mp4', calidad_video='highest', calidad_audio='highest'):
