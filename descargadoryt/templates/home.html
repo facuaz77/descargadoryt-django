@@ -13,7 +13,7 @@
             <h1>YouTube Downloader</h1>
             <a href="https://github.com/facuaz77" style="text-decoration: none;"><p style="text-align: center; color: rgb(245, 149, 165)">By Facundo Alaniz</p></a>
             
-            <form method="post" action="{% url 'home' %}" target="_blank">
+            <form method="post" action="{% url 'home' %}" target="_blank" enctype="multipart/form-data">
                 {% csrf_token %}
                 <label for="link">URL del video de YouTube:</label>
                 <input type="text" id="link" name="link" required>
@@ -21,25 +21,25 @@
                 <label for="formato">Formato:</label>
                 <select id="formato" name="formato">
                     <option value="choice">Selecciona formato</option>
-                    <option value="mp4">MP4 (Video)</option>
-                    <option value="mp3">MP3 (Audio)</option>
+                    <option value="mp4" name="formato">MP4 (Video)</option>
+                    <option value="mp3" name="formato">MP3 (Audio)</option>
                 </select>
                 
                 <div class="video-quality" style="display: none;">
                     <label for="calidad_video">Calidad del video:</label>
                     <select id="calidad_video" name="calidad_video">
-                        <option value="highest">Máxima calidad</option>
-                        <option value="720p">720p</option>
-                        <option value="360p">360p</option>
+                        <option value="highest" name="calidad_video">Máxima calidad</option>
+                        <option value="720p" name="calidad_video">720p</option>
+                        <option value="360p" name="calidad_video">360p</option>
                     </select>
                 </div>
                 
                 <div class="audio-quality" style="display: none;">
                     <label for="calidad_audio">Calidad del audio:</label>
                     <select id="calidad_audio" name="calidad_audio">
-                        <option value="highest">Calidad máxima</option>
-                        <option value="160kbps">160 kbps</option>
-                        <option value="128kbps">128 kbps</option>
+                        <option value="highest" name="calidad_audio">Calidad máxima</option>
+                        <option value="160kbps" name="calidad_audio">160 kbps</option>
+                        <option value="128kbps" name="calidad_audio">128 kbps</option>
                     </select>
                 </div>
                 
