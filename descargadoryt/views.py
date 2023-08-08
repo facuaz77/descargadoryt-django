@@ -1,10 +1,8 @@
+from django.shortcuts import render, HttpResponse
 import requests
 from pytube import YouTube
 from pytube.exceptions import PytubeError
 import logging
-from django.shortcuts import render, HttpResponse
-from .tasks import download_video_audio
-from pytube.exceptions import PytubeError
 
 def home(request):
     mensaje = ""
@@ -15,18 +13,16 @@ def home(request):
         calidad_audio = request.POST.get('calidad_audio', 'highest')
 
         try:
-            # Llama a la tarea de Celery para la descarga de video/audio de forma asíncrona
-            archivo, extension = download_video_audio.delay(link, formato, calidad_video, calidad_audio).get()
+            # Descargar el contenido del video/audio
+            archivo, extension = descargar_video_audio(link, formato, calidad_video, calidad_audio)
 
-            # Crea una respuesta para la descarga
+            # Crear una respuesta HTTP para la descarga
             response = HttpResponse(archivo, content_type=f"video/{extension}")
             response['Content-Disposition'] = f'attachment; filename="video.{extension}"'
             mensaje = f"Descarga completada!"
             return response
         except PytubeError as e:
             mensaje = f"Error en la descarga: {e}"
-
-
 
     return render(request, 'home.html', {'mensaje': mensaje})
 
