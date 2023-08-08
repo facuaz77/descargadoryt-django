@@ -1,9 +1,8 @@
-from django.shortcuts import render,HttpResponse
+from django.shortcuts import render, HttpResponse
 import requests
 from pytube import YouTube
 from pytube.exceptions import PytubeError
 import logging
-
 
 def home(request):
     mensaje = ""
@@ -27,16 +26,20 @@ def home(request):
 
     return render(request, 'home.html', {'mensaje': mensaje})
 
-def descargar_video_audio(url, formato='mp4', calidad_video='highest', calidad_audio='highest' ):
+def descargar_video_audio(url, formato='mp4', calidad_video='highest', calidad_audio='highest'):
     try:
         # Crea una instancia de la clase YouTube
         yt = YouTube(url)
 
         # Obtiene el flujo de video o audio según el formato seleccionado
         if formato == 'mp4':
-            stream = yt.streams.filter(file_extension='mp4', res=calidad_video).first()
+            streams = yt.streams.filter(file_extension='mp4')
+            print(streams)  # Print available mp4 streams for debugging
+            stream = streams.filter(res=calidad_video).first()
         elif formato == 'mp3':
-            stream = yt.streams.filter(only_audio=True, abr=calidad_audio).first()
+            streams = yt.streams.filter(only_audio=True)
+            print(streams)  # Print available audio streams for debugging
+            stream = streams.filter(abr=calidad_audio).first()
         else:
             raise ValueError("Formato no válido. Debe ser 'mp4' o 'mp3'.")
 
@@ -51,4 +54,3 @@ def descargar_video_audio(url, formato='mp4', calidad_video='highest', calidad_a
     except Exception as e:
         logging.error(f"Error during video download: {e}")
         raise PytubeError(f"Ocurrió un error durante la descarga del video: {e}")
-
